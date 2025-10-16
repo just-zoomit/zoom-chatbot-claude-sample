@@ -27,19 +27,25 @@ Before you can use this chatbot, you'll need the following:
 
 - Next, install the required Node.js packages:
 
-    - npm install
-
+```
+ npm install
+```
 
 ## Configuration
 
 You need to set up your environment variables. Create a `.env` file in the project root and add the following variables:
 
-- ZOOM_CLIENT_ID=
-- ZOOM_CLIENT_SECRET=
-- ZOOM_BOT_JID=
-- ZOOM_WEBHOOK_SECRET_TOKEN=
-- ZOOM_VERIFICATION_CODE=
-- ANTHROPIC_API_KEY=
+```
+touch .env
+```
+
+```
+ZOOM_CLIENT_ID=
+ZOOM_CLIENT_SECRET=
+ZOOM_BOT_JID=
+ZOOM_WEBHOOK_SECRET_TOKEN=
+ANTHROPIC_API_KEY=
+```
 
 
 To obtain these variables:
@@ -47,6 +53,21 @@ To obtain these variables:
 - For Zoom variables (ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_BOT_JID, ZOOM_WEBHOOK_SECRET_TOKEN, ZOOM_VERIFICATION_CODE), refer to the [Zoom App Marketplace guide on creating a Team Chat app](https://developers.zoom.us/docs/team-chat-apps/create/).
 
 - For the ANTHROPIC_API_KEY, you can obtain it by applying for access to Claude via the Anthropics [web console](https://console.anthropic.com/docs/api). Once you have access, you can generate API keys in your Account Settings.
+
+### Start your Ngrok (reverse proxy)
+
+Use Ngrok to tunnel traffic to this application via https. Once installed you may run this command from your terminal:
+
+```bash
+ngrok http 4000
+```
+
+Ngrok will output the origin it has created for your tunnel, eg `https://9a20-38-99-100-7.ngrok.io`. You'll need to use this across your App configuration in the Zoom Marketplace (web) build flow (see below).
+
+Please copy the https origin from the Ngrok terminal output and paste it in the `PUBLIC_URL` value in the `.env` file.
+![ngrok https origin](screenshots/ngrok-https-origin.png)
+
+Please note that this ngrok URL will change once you restart ngrok (unless you purchased your own ngrok pro account). If you shut down your Ngrok (there's no harm to leaving it on), upon restart you'll need to copy and paste the new origin into the `.env` file AND also to your Marketplace build flow.
 
 ## Running the Application
 

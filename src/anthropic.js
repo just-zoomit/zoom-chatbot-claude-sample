@@ -1,42 +1,77 @@
 const axios = require('axios');
 const { getChatbotToken } = require('./zoomAuth');
-const { sendChatToZoom } = require('./sendChatbotMessage'); // Only import sendChatToZoom
+const { sendChatToZoom } = require('./sendChatbotMessage');
 
-let conversationHistory = {};
+let conversationHistory = {}; // Keeps track per user JID
 
-// Function to handle communication with the Anthropc API
+// Function to handle communication with the Anthropic API (Claude 3)
 async function callAnthropicAPI(payload) {
+  const userJid = payload?.toJid;
+  if (!userJid) {
+    console.error("Error: payload.toJid is missing.");
+    return;
+  }
+
   try {
-    const userJid = payload.toJid;
-    const history = conversationHistory[userJid] || '';
-    const newUserPrompt = `\n\nHuman: ${payload.cmd}\n\nAssistant:`;
-    const prompt = history + newUserPrompt;
+    // Ensure conversation history is an array of messages
+    const history = conversationHistory[userJid] || [];
+
+    // Add the new user message
+    history.push({ role: "user", content: payload.cmd });
 
     const requestData = {
-      prompt,
-      model: 'claude-v1',
-      max_tokens_to_sample: 5000,
-      stop_sequences: ['\n\nHuman:'],
+      model: "claude-3-opus-20240229", // you can swap to claude-3-sonnet or claude-3-haiku
+      max_tokens: 1000,
+      messages: history,
     };
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    const baseURL = 'https://api.anthropic.com/v1/complete';
+    if (!apiKey) {
+      throw new Error("Missing ANTHROPIC_API_KEY in environment variables.");
+    }
+
+    const baseURL = "https://api.anthropic.com/v1/messages";
     const headers = {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01", // required for Claude 3 API
     };
 
     const response = await axios.post(baseURL, requestData, { headers });
-    const completion = response.data.completion;
 
-    // Save conversation history
-    conversationHistory[userJid] = prompt + completion;
-    
-    // Get Zoom chatbot token and send message to Zoom
-    const chatbotToken = await getChatbotToken();
-    await sendChatToZoom(chatbotToken, completion, payload);  // Call sendChatToZoom
+    if (!response?.data?.content || !Array.isArray(response.data.content)) {
+      throw new Error(`Unexpected response from Anthropic API: ${JSON.stringify(response.data)}`);
+    }
+
+    // Claude 3 returns an array of content blocks (e.g. text, images, etc.)
+    const completion = response.data.content
+      .filter(block => block.type === "text")
+      .map(block => block.text)
+      .join("\n");
+
+    // Save updated conversation history (including assistant response)
+    history.push({ role: "assistant", content: completion });
+    conversationHistory[userJid] = history;
+
+    // Send to Zoom
+    try {
+      const chatbotToken = await getChatbotToken();
+      await sendChatToZoom(chatbotToken, completion, payload);
+    } catch (zoomError) {
+      console.error("Error sending message to Zoom:", zoomError.message || zoomError);
+    }
+
   } catch (error) {
-    console.error('Error calling Anthropc API:', error);
+    if (error.response) {
+      console.error("Anthropic API Error:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    } else if (error.request) {
+      console.error("No response from Anthropic API:", error.request);
+    } else {
+      console.error("Error calling Anthropic API:", error.message);
+    }
   }
 }
 
