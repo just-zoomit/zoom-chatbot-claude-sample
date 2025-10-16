@@ -83,12 +83,16 @@ The application will run on `http://localhost:4000/` by default, but you can set
 
 - In your Zoom Team Chat App's Credentials section, go to the Local Test or Submit page depending on which environment you are using (Development or Production), and click "Add". 
 - After authorizing, you will be taken to Zoom Team Chat and see a message from the Zoom-Anthropic-Chatbot: <br />
-"Greetings from Zoom-Anthropic-Chatbot Bot!"
+```
+Greetings from Zoom-Anthropic-Chatbot Bot!
+```
 
 - To use the bot type a message in the chat like this: 
 
-"Tell me some places to visit in San Francisco?"
+```
 
+Tell me some places to visit in San Francisco?
+```
 ![Image 1](./images/image1.png)
 
 and your respose would look like this: 
