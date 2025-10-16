@@ -65,7 +65,7 @@ ngrok http 4000
 Ngrok will output the origin it has created for your tunnel, eg `https://9a20-38-99-100-7.ngrok.io`. You'll need to use this across your App configuration in the Zoom Marketplace (web) build flow (see below).
 
 Please copy the https origin from the Ngrok terminal output and paste it in the `PUBLIC_URL` value in the `.env` file.
-![ngrok https origin](screenshots/ngrok-https-origin.png)
+![ngrok https origin](images/ngrok-https-origin.png)
 
 Please note that this ngrok URL will change once you restart ngrok (unless you purchased your own ngrok pro account). If you shut down your Ngrok (there's no harm to leaving it on), upon restart you'll need to copy and paste the new origin into the `.env` file AND also to your Marketplace build flow.
 
