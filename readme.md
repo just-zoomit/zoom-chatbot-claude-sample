@@ -72,8 +72,10 @@ Please note that this ngrok URL will change once you restart ngrok (unless you p
 ## Running the Application
 
 To start the application:
-
+```
 node index.js
+
+```
 
 The application will run on `http://localhost:4000/` by default, but you can set a different port by changing the `PORT` variable in your `.env` file.
 
